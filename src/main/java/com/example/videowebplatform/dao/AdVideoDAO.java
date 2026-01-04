@@ -9,4 +9,5 @@ public interface AdVideoDAO {
      * @return 广告视频列表。
      */
     List<AdVideo> getAllAds();
+    void saveOrUpdateExternalAd(String title, String mediaUrl);
 }

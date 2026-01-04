@@ -1,8 +1,8 @@
 package com.example.videowebplatform.controller;
 
-import com.example.videowebplatform.dao.VideoDAO;
-import com.example.videowebplatform.dao.VideoDAOImpl;
-import com.example.videowebplatform.model.Video;
+import com.example.videowebplatform.dao.AdVideoDAO;
+import com.example.videowebplatform.dao.AdVideoDAOImpl;
+import com.example.videowebplatform.model.AdVideo;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,49 +10,48 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.*;
+import java.util.List;
 
-@WebServlet("/stream")
-public class StreamServlet extends HttpServlet {
+@WebServlet("/adstream")
+public class AdStreamServlet extends HttpServlet {
 
-    // 视频存储的基础路径
-    private static final String BASE_VIDEO_PATH = "E:/videos/movies/";
-    private final VideoDAO videoDAO = new VideoDAOImpl();
-    private static final int BUFFER_SIZE = 16384; // 16KB 缓冲区
+    private static final String BASE_VIDEO_PATH = "E:/videos/ads/";
+    private final AdVideoDAO adVideoDAO = new AdVideoDAOImpl();
+    private static final int BUFFER_SIZE = 16384;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. 获取视频ID
-        String videoIdParam = request.getParameter("id");
-        if (videoIdParam == null) {
+        String adIdParam = request.getParameter("id");
+        if (adIdParam == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        // 2. 查询视频信息
-        Video video;
-        try {
-            int id = Integer.parseInt(videoIdParam);
-            video = videoDAO.getVideoById(id);
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+        // 简单粗暴地遍历获取广告文件名 (由于没有 getAdById 方法，这里暂时遍历)
+        int adId = Integer.parseInt(adIdParam);
+        List<AdVideo> ads = adVideoDAO.getAllAds();
+        AdVideo targetAd = null;
+        for (AdVideo ad : ads) {
+            if (ad.getId() == adId) {
+                targetAd = ad;
+                break;
+            }
         }
 
-        if (video == null || video.getFileName() == null) {
+        if (targetAd == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        // 3. 找到物理文件
-        File videoFile = new File(BASE_VIDEO_PATH + video.getFileName());
+        File videoFile = new File(BASE_VIDEO_PATH + targetAd.getFileName());
         if (!videoFile.exists()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        // 4. 处理 Range 头 (支持拖动进度条和分段加载的关键)
+        // --- 标准流处理逻辑 (与 StreamServlet 相同) ---
         long fileLength = videoFile.length();
         long start = 0;
         long end = fileLength - 1;
@@ -61,7 +60,6 @@ public class StreamServlet extends HttpServlet {
         if (rangeHeader != null) {
             response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
             try {
-                // 解析 "bytes=0-1024" 格式
                 String rangeValue = rangeHeader.substring("bytes=".length());
                 String[] ranges = rangeValue.split("-");
                 start = Long.parseLong(ranges[0]);
@@ -69,7 +67,6 @@ public class StreamServlet extends HttpServlet {
                     end = Long.parseLong(ranges[1]);
                 }
             } catch (NumberFormatException e) {
-                // 如果 Range 格式错误，忽略它，发送整个文件
                 start = 0;
                 end = fileLength - 1;
             }
@@ -77,7 +74,6 @@ public class StreamServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_OK);
         }
 
-        // 校验范围
         if (start > end || start >= fileLength) {
             response.setHeader("Content-Range", "bytes */" + fileLength);
             response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
@@ -85,35 +81,26 @@ public class StreamServlet extends HttpServlet {
         }
 
         long contentLength = end - start + 1;
-
-        // 5. 设置响应头
         response.setContentType("video/mp4");
         response.setHeader("Accept-Ranges", "bytes");
         response.setHeader("Content-Length", String.valueOf(contentLength));
         response.setHeader("Content-Range", String.format("bytes %d-%d/%d", start, end, fileLength));
-        response.setHeader("Content-Disposition", "inline; filename=\"" + video.getFileName() + "\"");
+        response.setHeader("Content-Disposition", "inline; filename=\"" + targetAd.getFileName() + "\"");
 
-        // 6. 传输数据
         try (RandomAccessFile raf = new RandomAccessFile(videoFile, "r");
              OutputStream out = response.getOutputStream()) {
-
-            raf.seek(start); // 跳转到请求的起始位置
+            raf.seek(start);
             byte[] buffer = new byte[BUFFER_SIZE];
             long bytesNeeded = contentLength;
-
             while (bytesNeeded > 0) {
                 int bytesToRead = (int) Math.min(BUFFER_SIZE, bytesNeeded);
                 int bytesRead = raf.read(buffer, 0, bytesToRead);
-
-                if (bytesRead == -1) {
-                    break;
-                }
-
+                if (bytesRead == -1) break;
                 out.write(buffer, 0, bytesRead);
                 bytesNeeded -= bytesRead;
             }
         } catch (IOException e) {
-            // 客户端中断连接（如用户停止播放或跳转），这是正常现象，不需要打印堆栈
+            // Ignore client abort
         }
     }
 }

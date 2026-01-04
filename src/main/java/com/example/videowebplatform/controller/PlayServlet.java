@@ -43,6 +43,8 @@ public class PlayServlet extends HttpServlet {
                 if (showAd) {
                     // 随机选择一个广告
                     AdVideo ad = ads.get(random.nextInt(ads.size()));
+                    String remoteApiUrl = "http://175.24.232.219:8080/uploads/test.mp4";
+                    ad.setFileName(remoteApiUrl);
 
                     // 随机选择广告类型：0=前贴片，1=中插，2=后贴片
                     int adType = random.nextInt(3);

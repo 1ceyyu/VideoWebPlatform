@@ -12,7 +12,7 @@
 <div class="video-grid">
     <c:forEach var="video" items="${videoList}">
         <div class="video-card">
-            <img src="${pageContext.request.contextPath}/resources/covers/${video.coverImage}"
+            <img src="${pageContext.request.contextPath}/cover?name=${video.coverImage}"
                  alt="Cover"
                  onerror="this.src='${pageContext.request.contextPath}/resources/covers/default.jpg';"
                  style="width: 100%; height: 180px; object-fit: cover; display: block;">
