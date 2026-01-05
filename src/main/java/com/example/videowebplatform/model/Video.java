@@ -14,4 +14,14 @@ public class Video {
     private String coverImage;
     private long durationSeconds; // 视频时长，单位为秒
     private long fileLengthBytes; // 视频文件大小，单位为字节
+    private int categoryId;     // 分类ID
+    private String categoryName; // 分类名称
+    public Video(int id, String title, String fileName, String coverImage, long durationSeconds, long fileLengthBytes) {
+        this.id = id;
+        this.title = title;
+        this.fileName = fileName;
+        this.coverImage = coverImage;
+        this.durationSeconds = durationSeconds;
+        this.fileLengthBytes = fileLengthBytes;
+    }
 }

@@ -11,7 +11,7 @@ import java.nio.file.Files;
 @WebServlet("/cover")
 public class ImageStreamServlet extends HttpServlet {
 
-    private static final String COVER_BASE_PATH = "E:/videos/covers/";
+    private static final String COVER_BASE_PATH = "/var/www/videodata/covers/";
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String imageName = request.getParameter("name");

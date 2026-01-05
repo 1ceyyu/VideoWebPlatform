@@ -51,13 +51,13 @@
                     </c:choose>
                 </video>
 
-                    <%-- 【新增/补全】：广告控制面板，没有这些 JS 会报错 --%>
+                    <%-- 广告控制面板，没有这些 JS 会报错 --%>
                 <div class="ad-controls">
                     <div class="ad-info">
                         广告剩余: <span id="adTime">--</span> 秒
                     </div>
                     <div>
-                        <span id="skipSeconds">5</span>秒后可跳过
+                        <span id="skipSeconds">15</span>秒后可跳过
                         <button id="skipAdBtn" disabled>请稍候</button>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
     adType = ${adType};
     midAdTime = ${midAdTime};
     adDuration = ${adVideo.durationSeconds} || 15; // 默认15秒
-    skipDelay = 5;
+    skipDelay = 15;
     adPlayed = false;
     adTimer = null;
 

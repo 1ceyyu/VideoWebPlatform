@@ -1,5 +1,6 @@
 package com.example.videowebplatform.dao;
 import com.example.videowebplatform.model.Video;
+import com.example.videowebplatform.model.Category;
 import java.util.List;
 public interface VideoDAO {
     List<Video> getAllVideos();
@@ -9,4 +10,6 @@ public interface VideoDAO {
 
     // 可以继续添加其他操作，如 save, update, delete
     void saveVideo(Video video);
+    List<Category> getAllCategories();
+    List<Video> getVideosByCategoryId(int catId); // catId为0时查全部
 }

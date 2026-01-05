@@ -10,12 +10,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @WebServlet("/stream")
 public class StreamServlet extends HttpServlet {
 
     // 视频存储的基础路径
-    private static final String BASE_VIDEO_PATH = "E:/videos/movies/";
+    private static final String BASE_VIDEO_PATH = "/var/www/videodata/movies/";
     private final VideoDAO videoDAO = new VideoDAOImpl();
     private static final int BUFFER_SIZE = 16384; // 16KB 缓冲区
 
@@ -48,7 +50,7 @@ public class StreamServlet extends HttpServlet {
         // 3. 找到物理文件
         File videoFile = new File(BASE_VIDEO_PATH + video.getFileName());
         if (!videoFile.exists()) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "磁盘上找不到视频文件");
             return;
         }
 
@@ -69,7 +71,6 @@ public class StreamServlet extends HttpServlet {
                     end = Long.parseLong(ranges[1]);
                 }
             } catch (NumberFormatException e) {
-                // 如果 Range 格式错误，忽略它，发送整个文件
                 start = 0;
                 end = fileLength - 1;
             }
@@ -91,7 +92,14 @@ public class StreamServlet extends HttpServlet {
         response.setHeader("Accept-Ranges", "bytes");
         response.setHeader("Content-Length", String.valueOf(contentLength));
         response.setHeader("Content-Range", String.format("bytes %d-%d/%d", start, end, fileLength));
-        response.setHeader("Content-Disposition", "inline; filename=\"" + video.getFileName() + "\"");
+
+        // 使用 URLEncoder 将中文转为 % 编码，并使用 RFC 6266 标准的 filename*
+        String fileName = video.getFileName();
+        String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString())
+                .replaceAll("\\+", "%20"); // 处理空格转换问题
+
+        // filename*=UTF-8'' 这种写法是现代浏览器处理 Header 中文的最佳实践
+        response.setHeader("Content-Disposition", "inline; filename*=UTF-8''" + encodedFileName);
 
         // 6. 传输数据
         try (RandomAccessFile raf = new RandomAccessFile(videoFile, "r");
@@ -113,7 +121,7 @@ public class StreamServlet extends HttpServlet {
                 bytesNeeded -= bytesRead;
             }
         } catch (IOException e) {
-            // 客户端中断连接（如用户停止播放或跳转），这是正常现象，不需要打印堆栈
+            // 客户端中断连接（如用户停止播放或跳转），属于正常情况
         }
     }
 }

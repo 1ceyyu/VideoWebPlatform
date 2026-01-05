@@ -6,9 +6,9 @@ import java.sql.SQLException;
 
 public class DBUtil {
     // 数据库连接配置
-    private static final String URL = "jdbc:mysql://localhost:3306/videowebsite?serverTimezone=UTC";
-    private static final String USER = "root";
-    private static final String PASSWORD = "200588liu";
+    private static final String URL = "jdbc:mysql://10.100.164.26:3306/videowebsite?serverTimezone=UTC";
+    private static final String USER = "remote_admin";
+    private static final String PASSWORD = "AdminPassword123!";
 
     // 静态代码块，用于加载 JDBC 驱动
     static {

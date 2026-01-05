@@ -15,7 +15,7 @@ import java.util.List;
 @WebServlet("/adstream")
 public class AdStreamServlet extends HttpServlet {
 
-    private static final String BASE_VIDEO_PATH = "E:/videos/ads/";
+    private static final String BASE_VIDEO_PATH = "/var/www/videodata/ads/";
     private final AdVideoDAO adVideoDAO = new AdVideoDAOImpl();
     private static final int BUFFER_SIZE = 16384;
 

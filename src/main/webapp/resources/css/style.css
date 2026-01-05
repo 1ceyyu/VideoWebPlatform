@@ -92,3 +92,67 @@ a:hover {
     border-radius: 5px;
     background: #000;
 }
+/* 分类导航栏样式 */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+    border-radius: 8px;
+}
+
+.category-nav {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.nav-item {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: #555;
+    background: #fff;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.nav-item:hover {
+    background: #e9ecef;
+}
+
+.nav-item.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: bold;
+}
+
+.btn-publish {
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn-publish:hover {
+    background: #218838;
+}
+
+/* 视频卡片分类标签样式 */
+.category-tag {
+    font-size: 12px;
+    color: #007bff;
+    background: #e7f3ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    display: inline-block;
+}
