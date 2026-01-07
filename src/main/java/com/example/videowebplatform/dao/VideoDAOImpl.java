@@ -3,6 +3,7 @@ package com.example.videowebplatform.dao;
 import com.example.videowebplatform.model.Category;
 import com.example.videowebplatform.model.Video;
 import com.example.videowebplatform.util.DBUtil;
+import com.example.videowebplatform.model.CategoryStat;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.*;
@@ -123,5 +124,42 @@ public class VideoDAOImpl implements VideoDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+    @Override
+    public List<CategoryStat> getCategoryStatistics() {
+        List<CategoryStat> stats = new ArrayList<>();
+        // SQL：按分类分组统计点击量总和
+        String sql = "SELECT c.name, SUM(v.clicks) as total_clicks " +
+                "FROM category c LEFT JOIN video v ON c.id = v.category_id " +
+                "GROUP BY c.id, c.name";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                CategoryStat stat = new CategoryStat();
+                stat.setName(rs.getString("name"));
+                stat.setTotalClicks(rs.getInt("total_clicks"));
+                stats.add(stat);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return stats;
+    }
+
+    @Override
+    public void incrementVideoClicks(int videoId) {
+        String sql = "UPDATE video SET clicks = clicks + 1 WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, videoId);
+            ps.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+    @Override
+    public void resetAllClicks() {
+        String sql = "UPDATE video SET clicks = 0";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 }

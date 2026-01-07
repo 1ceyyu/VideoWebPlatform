@@ -31,6 +31,7 @@ public class PlayServlet extends HttpServlet {
 
         try {
             int id = Integer.parseInt(videoIdParam);
+            videoDAO.incrementVideoClicks(id);
             Video video = videoDAO.getVideoById(id);
 
             if (video != null) {
@@ -82,5 +83,7 @@ public class PlayServlet extends HttpServlet {
         } catch (NumberFormatException | NullPointerException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "无效的视频ID");
         }
+
     }
+
 }

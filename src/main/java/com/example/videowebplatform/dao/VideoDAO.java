@@ -1,6 +1,7 @@
 package com.example.videowebplatform.dao;
 import com.example.videowebplatform.model.Video;
 import com.example.videowebplatform.model.Category;
+import com.example.videowebplatform.model.CategoryStat;
 import java.util.List;
 public interface VideoDAO {
     List<Video> getAllVideos();
@@ -12,4 +13,7 @@ public interface VideoDAO {
     void saveVideo(Video video);
     List<Category> getAllCategories();
     List<Video> getVideosByCategoryId(int catId); // catId为0时查全部
+    List<CategoryStat> getCategoryStatistics();
+    void incrementVideoClicks(int videoId);
+    void resetAllClicks();
 }
