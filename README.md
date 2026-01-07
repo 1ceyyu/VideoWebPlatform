@@ -1,7 +1,7 @@
 
 # Video Web Platform
 
-这是一个基于 Java Servlet + JDBC 开发的轻量级视频管理与播放平台。系统不仅提供了流媒体播放和广告投放功能，还内置了受众喜好分析接口 (API)，支持第三方网站获取实时统计数据。
+一个功能完整的视频播放与管理系统，支持视频上传、分类浏览、智能广告插入和流媒体播放。采用Java Servlet + JSP + MySQL技术栈构建，系统不仅提供了流媒体播放和广告投放功能，还内置了受众喜好分析接口 (API)，支持第三方网站获取实时统计数据。
 
 ## 🌐 部署与访问信息
 - **项目主页**: http://10.100.164.26:8080/VideoWebPlatform/home
@@ -9,9 +9,16 @@
 
 ## 🚀 核心功能
 - **流媒体传输**: 使用 StreamServlet 处理视频流，支持 HTML5 播放器的 Range 请求（实现进度条随意拖动）。
-- **广告系统**: 视频播放前自动加载贴片广告，支持 5 秒倒计时、手动跳过及自动结束切换。
-- **点击量统计**: 用户每进入一次播放页，系统自动更新数据库中对应视频分类的点击总数。
+- **广告系统**:  视频播放前自动加载贴片广告，支持 5 秒倒计时、手动跳过及自动结束切换。
+- **点击量统计**:  用户每进入一次播放页，系统自动更新数据库中对应视频分类的点击总数。
 - **自动重置机制**: 集成 HttpSessionListener。当服务器检测到全站无活跃用户（所有用户关闭浏览器或会话超时）时，自动清空数据库点击统计，实现数据的新鲜度管理。
+
+## 🏗️技术栈
+- **后端**: Java Servlet 4.0+, JDBC
+- **前端**: JSP + JSTL + HTML5 + CSS3 + JavaScript
+- **数据库**: MySQL 8.0+
+- **构建工具**: Maven
+- **服务器**: Apache Tomcat 10+
 
 ## 📊 开放 API 规范
 本项目对外开放了 JSON 格式的统计接口，支持跨域访问（CORS），方便其他网站采集用户喜好数据。
@@ -37,42 +44,81 @@
 ## 📂 详细项目结构
 项目采用典型的 MVC (Model-View-Controller) 架构，确保了逻辑与展示的彻底分离。
 
-### 1. 后端逻辑 (src/main/java)
+### 项目结构
 ```
-com.example.videowebplatform/
-├── controller/                 # 控制层 (Controller)
-│   ├── AddVideoPageServlet.java   # 跳转至上传页面
-│   ├── AddVideoServlet.java       # 处理视频上传逻辑
-│   ├── CategoryServlet.java       # 处理分类过滤查询
-│   ├── HomeServlet.java           # 首页数据装载与跳转
-│   ├── PlayServlet.java           # 播放逻辑：处理广告判定与点击量累加
-│   ├── StreamServlet.java         # 二进制流传输：支持视频断点续传
-│   └── VideoStatApiServlet.java   # [API] 返回 JSON 格式的分类统计数据
-├── dao/                        # 数据访问层 (DAO)
-│   ├── VideoDAO.java              # 接口定义：包含统计与重置方法
-│   └── VideoDAOImpl.java          # JDBC 实现：执行 SUM 聚合查询与 UPDATE
-├── model/                      # 模型层 (Model)
-│   ├── Video.java                 # 视频实体类
-│   ├── Category.java              # 分类实体类
-│   └── CategoryStat.java          # 统计专用 DTO (包含分类名与总点击数)
-├── listener/                   # 监听器层
-│   └── SessionCounterListener.java # 监听 Session 销毁，触发数据库清零逻辑
-└── util/                       # 工具类
-    └── DBUtil.java                # 封装数据库连接池 (JDBC)
-```
-
-### 2. 前端展示 (src/main/webapp)
-```
-webapp/
-├── WEB-INF/
-│   ├── views/                  # 视图层 (View): 受保护的 JSP 页面
-│   │   ├── addVideoPage.jsp       # 视频上传表单页面
-│   │   ├── home.jsp               # 视频展示主页
-│   │   └── play.jsp               # 视频播放页（含广告倒计时与跳过逻辑）
-│   ├── lib/                    # 项目依赖 (gson-x.x.jar, mysql-connector-j.jar)
-│   └── web.xml                 # 全局配置：Servlet 映射及 Session 超时时间
-├── index.jsp                   # 入口引导页
-└── static/                     # 静态资源 (存放 CSS, JS 脚本等)
+video-web-platform/                          # 项目根目录
+├── pom.xml                                   # Maven 配置文件
+├── README.md                                 # 项目说明文档
+├── .gitignore                                # Git 忽略文件配置
+│
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/example/videowebplatform/
+│   │   │       ├── controller/               # 控制器层（Servlet）
+│   │   │       │   ├── AddVideoPageServlet.java          # 添加视频页面控制器
+│   │   │       │   ├── AdStreamServlet.java              # 广告视频流控制器
+│   │   │       │   ├── HomeServlet.java                  # 首页控制器
+│   │   │       │   ├── ImageStreamServlet.java           # 封面图片流控制器
+│   │   │       │   ├── PlayServlet.java                  # 视频播放控制器
+│   │   │       │   ├── StreamServlet.java                # 主视频流控制器
+│   │   │       │   ├── UploadVideoServlet.java           # 视频上传控制器
+│   │   │       │   └── VideoStatApiServlet.java          # 视频统计API控制器
+│   │   │       │
+│   │   │       ├── dao/                      # 数据访问层
+│   │   │       │   ├── AdVideoDAO.java                   # 广告DAO接口
+│   │   │       │   ├── AdVideoDAOImpl.java               # 广告DAO实现
+│   │   │       │   ├── VideoDAO.java                     # 视频DAO接口
+│   │   │       │   └── VideoDAOImpl.java                 # 视频DAO实现
+│   │   │       │
+│   │   │       ├── model/                    # 数据模型层
+│   │   │       │   ├── AdVideo.java                      # 广告视频实体类
+│   │   │       │   ├── Category.java                     # 分类实体类
+│   │   │       │   ├── CategoryStat.java                 # 分类统计实体类
+│   │   │       │   └── Video.java                        # 视频实体类
+│   │   │       │
+│   │   │       ├── util/                     # 工具类层
+│   │   │       │   ├── AdSyncService.java                # 广告同步服务
+│   │   │       │   ├── DBUtil.java                       # 数据库工具类
+│   │   │       │   └── VideoUtil.java                    # 视频处理工具类
+│   │   │       │
+│   │   │       └── listener/                 # 监听器层
+│   │   │           ├── AppInitListener.java              # 应用初始化监听器
+│   │   │           └── SessionCounterListener.java       # 会话计数监听器
+│   │   │
+│   │   └── webapp/                           # Web 资源目录
+│   │       ├── WEB-INF/                      # 受保护目录
+│   │       │   ├── web.xml                   # Web 应用部署描述符（可选）
+│   │       │   └── views/                    # JSP 视图文件
+│   │       │       ├── addVideoPage.jsp      # 添加视频页面
+│   │       │       ├── home.jsp              # 首页
+│   │       │       └── videoPlayerNew.jsp    # 视频播放页面
+│   │       │
+│   │       ├── resources/                    # 静态资源
+│   │       │   ├── css/
+│   │       │   │   └── style.css             # 全局样式表
+│   │       │   ├── js/
+│   │       │   │   └── script.js             # 全局JavaScript文件
+│   │       │   └── covers/                   # 默认封面图片
+│   │       │       └── default.jpg           # 默认封面
+│   │       │
+│   │       └── index.jsp                     # 首页重定向页面
+│   │
+│   └── test/                                 # 测试目录
+│       ├── java/                             # 单元测试
+│       └── resources/                        # 测试资源
+│
+├── target/                                   # Maven 构建输出目录
+├── lib/                                      # 第三方依赖库（如有）
+└── config/                                   # 配置文件目录
+    ├── database/                             # 数据库脚本
+    │   ├── schema.sql                        # 数据库表结构
+    │   ├── data.sql                          # 初始数据
+    │   └── indexes.sql                       # 索引优化脚本
+    └── deployment/                           # 部署配置
+        ├── tomcat-context.xml                # Tomcat 上下文配置
+        ├── nginx.conf                        # Nginx 反向代理配置
+        └── log4j2.xml                        # 日志配置文件
 ```
 
 ## 🛠️ 数据库设计
@@ -96,6 +142,35 @@ CREATE TABLE video (
 );
 ```
 
+## 核心配置
+文件存储路径
+```java
+// 主视频存储路径
+private static final String BASE_VIDEO_PATH = "/var/www/videodata/movies/";
+// 封面图片存储路径  
+private static final String COVER_BASE_PATH = "/var/www/videodata/covers/";
+// 广告视频存储路径
+private static final String BASE_VIDEO_PATH = "/var/www/videodata/ads/";
+```
+广告配置
+```java
+// 广告显示概率（70%）
+boolean showAd = !ads.isEmpty() && random.nextInt(100) < 70;
+
+// 广告类型：0=前贴片，1=中插，2=后贴片
+int adType = random.nextInt(3);
+
+// 广告跳过等待时间（秒）
+int skipDelay = 15;
+```
+视频上传配置
+```java
+@MultipartConfig(
+    fileSizeThreshold = 1024 * 1024 * 2,  // 2MB
+    maxFileSize = 1024 * 1024 * 100,      // 100MB
+    maxRequestSize = 1024 * 1024 * 110    // 110MB
+)
+```
 ## 📝 开发者备注
 - **CORS 跨域说明**: API 接口已配置 `Access-Control-Allow-Origin: *`，其他网站的 JS 可通过 `fetch()` 直接调用。
 - **重置延迟**: 由于浏览器关闭无法实时通知服务器，Session 销毁存在延迟（默认为 30 分钟）。若需调整，请修改 web.xml 中的 `<session-timeout>`。
